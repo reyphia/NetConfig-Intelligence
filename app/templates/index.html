@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NetConfig Intelligence</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="noise-layer" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <a class="brand" href="/">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-word">netconfig<span class="brand-word-accent">·intelligence</span></span>
+      </a>
+      <span class="topbar-badge"><span class="live-dot" aria-hidden="true"></span>Local-only<span class="badge-full">, no network calls</span></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro container">
+      <div class="intro-copy">
+        <p class="kicker">Cisco IOS / IOS-XE &middot; MikroTik RouterOS</p>
+        <h1>Point it at a running-config. Get the truth about it.</h1>
+        <p class="intro-sub">Parses a real device configuration into a vendor-neutral model, finds security and consistency problems, and masks every credential by default. Everything happens in this process — nothing is uploaded anywhere.</p>
+      </div>
+
+      <form id="analyze-form" class="analyze-card">
+        <div class="analyze-row">
+          <label class="field">
+            <span>Vendor</span>
+            <select name="vendor">
+              <option value="auto">Detect automatically</option>
+              <option value="cisco_ios">Cisco IOS</option>
+              <option value="cisco_iosxe">Cisco IOS-XE</option>
+              <option value="mikrotik_routeros">MikroTik RouterOS</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Configuration file</span>
+            <input type="file" name="file" accept=".cfg,.txt,.rsc">
+          </label>
+        </div>
+        <label class="field">
+          <span>Or paste configuration</span>
+          <textarea name="text" rows="8" placeholder="show running-config / /export output …"></textarea>
+        </label>
+        <div class="analyze-actions">
+          <button class="btn btn-primary" type="submit">Analyze locally</button>
+          <p class="hint">Try a sample: <button type="button" class="btn-text" data-example="cisco">problematic Cisco config</button> &middot; <button type="button" class="btn-text" data-example="mikrotik">MikroTik export</button></p>
+        </div>
+        <p id="error" class="form-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="results" class="results container" hidden>
+      <div class="stat-row">
+        <article class="stat-card">
+          <p class="stat-label">Device</p>
+          <h2 id="hostname">—</h2>
+          <p id="vendor" class="stat-sub"></p>
+        </article>
+
+        <article class="stat-card score-card">
+          <p class="stat-label">Health score</p>
+          <div class="score-ring">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+              <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="54"></circle>
+            </svg>
+            <span id="score" class="score-num">—</span>
+          </div>
+          <p id="score-detail" class="stat-sub"></p>
+        </article>
+
+        <article class="stat-card">
+          <p class="stat-label">Sensitive data</p>
+          <h2 id="sensitive">—</h2>
+          <p id="secret-detail" class="stat-sub"></p>
+        </article>
+      </div>
+
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-tab="findings" type="button">Findings</button>
+        <button class="tab" data-tab="config" type="button">Configuration</button>
+        <button class="tab" data-tab="validation" type="button">Validation</button>
+        <button class="tab" data-tab="replay" type="button">Replay plan</button>
+      </nav>
+
+      <section class="tab-panel" data-panel="findings">
+        <div id="findings" class="findings-list"></div>
+      </section>
+
+      <section class="tab-panel" data-panel="config" hidden>
+        <div class="workspace-toolbar">
+          <div>
+            <h2>Safe workspace</h2>
+            <p class="stat-sub">Credentials stay hidden unless you explicitly reveal recoverable values, locally.</p>
+          </div>
+          <div class="workspace-actions">
+            <button id="reveal" class="btn btn-ghost" type="button">Show recoverable passwords</button>
+            <a id="download-sanitized" class="btn btn-ghost" download>Download sanitized</a>
+            <a id="download-anonymized" class="btn btn-primary" download>Download anonymized</a>
+          </div>
+        </div>
+
+        <div id="revealed" class="danger-panel" hidden>
+          <p class="danger-title">Visible credentials — local view only</p>
+          <p class="stat-sub">Do not screen-share this panel. One-way hashes (type 5/8/9) are never shown — only plaintext and Cisco's reversible type 7 values.</p>
+          <pre id="credential-list" class="terminal-block"></pre>
+          <button id="hide" class="btn btn-ghost" type="button">Hide</button>
+        </div>
+
+        <div class="terminal">
+          <div class="termbar">
+            <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+            <span class="termtitle">sanitized-config</span>
+          </div>
+          <pre id="config" class="terminal-body"></pre>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="validation" hidden>
+        <div id="validation" class="checklist"></div>
+      </section>
+
+      <section class="tab-panel" data-panel="replay" hidden>
+        <div id="replay-meta" class="replay-meta"></div>
+        <ol id="replay" class="replay-steps"></ol>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer container">
+    <p>NetConfig Intelligence — processes everything locally.</p>
+    <p><a href="https://github.com" target="_blank" rel="noopener">Source &amp; docs</a></p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
