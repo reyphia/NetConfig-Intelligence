@@ -1,0 +1,2 @@
+[console_scripts]
+netconfig = app.cli.main:main
